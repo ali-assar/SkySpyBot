@@ -44,7 +44,8 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 }
 
 func SendWeather(chatID int64, cityLocation string) error {
-	var Description string
+	var description string
+	var icon string
 	w, err := owm.NewCurrent("C", "EN", OWMApiKey)
 	if err != nil {
 		log.Fatalln(err)
@@ -54,26 +55,35 @@ func SendWeather(chatID int64, cityLocation string) error {
 
 	// Assuming 'w' contains the weather data
 	if w.Weather != nil {
-		var conditionCode = w.Weather[0].ID // Get the first condition code
-		description, ok := weatherDescriptions[conditionCode]
-		if !ok {
-			description = "Unknown" // Fallback if the code is not in the map
-		}
-		Description = description
+		description = w.Weather[0].Description
+		icon = w.Weather[0].Icon
 	} else {
 		msg := "data for requested location is not valid"
 		return SendMessage(chatID, msg)
 	}
+
+	// Construct the URL to the weather icon
+	iconURL := fmt.Sprintf("http://openweathermap.org/img/wn/%s@4x.png", icon)
+
+	// Send the icon
+	if err := SendPhoto(chatID, iconURL); err != nil {
+		fmt.Println("error in sending icon:", err)
+		return err
+	}
+
 	// Create a single message with all the weather data
+	percentString := "%"
 	msg := emoji.Sprintf(
-		"Temperature: :thermometer: Temperature %.3f \nFeels Like: %.3f\nHumidity: :droplet: %v\nSunrise: :sunrise: %s\nSunset: :city_sunset: %s\nWind Speed: :dash: %.3f\nWeather: %s",
+		":satellite:Weather: %s\n:thermometer:Temperature: %.3f (Feels Like: %.3f)\n:droplet:Humidity: %v%s\n:sunrise:Sunrise: %s\n:sunset:Sunset: %s\n:dash:Wind Speed: %.3f KpH\n %v",
+		description,
 		w.Main.Temp,
 		w.Main.FeelsLike,
 		w.Main.Humidity,
+		percentString,
 		time.Unix(int64(w.Sys.Sunrise), 0).Format("15:04 MST"),
 		time.Unix(int64(w.Sys.Sunset), 0).Format("15:04 MST"),
 		w.Wind.Speed,
-		Description,
+		time.Unix(int64(w.Dt), 0), //Todo: handle this part later
 	)
 
 	// Send the message
@@ -94,6 +104,31 @@ func SendMessage(chatID int64, text string) error {
 	}
 
 	telegramApi := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", TelegramApikey)
+	// Send a post request with your token
+	res, err := http.Post(telegramApi, "application/json", bytes.NewBuffer(reqBytes))
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return errors.New("unexpected status" + res.Status)
+	}
+
+	return nil
+}
+
+func SendPhoto(chatID int64, photoURL string) error {
+	reqBody := &types.SendPhotoReqBody{
+		ChatID: chatID,
+		Photo:  photoURL,
+	}
+	fmt.Println("******", photoURL)
+	// Create the JSON body from the struct
+	reqBytes, err := json.Marshal(reqBody)
+	if err != nil {
+		return err
+	}
+
+	telegramApi := fmt.Sprintf("https://api.telegram.org/bot%s/sendPhoto", TelegramApikey)
 	// Send a post request with your token
 	res, err := http.Post(telegramApi, "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {

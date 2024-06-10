@@ -18,3 +18,14 @@ type SendPhotoReqBody struct {
 	ChatID int64  `json:"chat_id"`
 	Photo  string `json:"photo"`
 }
+
+type WeatherData struct {
+	Description string
+	Temperature float64
+	FeelsLike   float64
+	Humidity    int
+	Sunset      int
+	Sunrise     int
+	WindSpeed   float64
+	Dt          int
+}

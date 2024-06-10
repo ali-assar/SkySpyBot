@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/Ali-Assar/SkySpyBot/types"
 	owm "github.com/briandowns/openweathermap"
 	"github.com/enescakir/emoji"
 )
@@ -40,19 +41,35 @@ func SendWeather(chatID int64, cityLocation string) error {
 		return err
 	}
 
+	data := types.WeatherData{
+		Description: description,
+		Temperature: w.Main.Temp,
+		FeelsLike:   w.Main.FeelsLike,
+		Humidity:    w.Main.Humidity,
+		Sunset:      w.Sys.Sunrise,
+		Sunrise:     w.Sys.Sunset,
+		WindSpeed:   w.Wind.Speed,
+		Dt:          w.Dt,
+	}
+
+	msg := CreateWeatherMsg(data)
+
+	return SendMessage(chatID, msg)
+}
+
+func CreateWeatherMsg(data types.WeatherData) string {
 	percentString := "%"
 	msg := emoji.Sprintf(
 		":satellite:Weather: %s\n:thermometer:Temperature: %.3f (Feels Like: %.3f)\n:droplet:Humidity: %v%s\n:sunrise:Sunrise: %s\n:sunset:Sunset: %s\n:dash:Wind Speed: %.3f KpH\n %v",
-		description,
-		w.Main.Temp,
-		w.Main.FeelsLike,
-		w.Main.Humidity,
+		data.Description,
+		data.Temperature,
+		data.FeelsLike,
+		data.Humidity,
 		percentString,
-		time.Unix(int64(w.Sys.Sunrise), 0).Format("15:04 MST"),
-		time.Unix(int64(w.Sys.Sunset), 0).Format("15:04 MST"),
-		w.Wind.Speed,
-		time.Unix(int64(w.Dt), 0),
+		time.Unix(int64(data.Sunrise), 0).Format("15:04 MST"),
+		time.Unix(int64(data.Sunset), 0).Format("15:04 MST"),
+		data.WindSpeed,
+		time.Unix(int64(data.Dt), 0),
 	)
-
-	return SendMessage(chatID, msg)
+	return msg
 }

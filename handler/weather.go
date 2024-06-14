@@ -5,12 +5,14 @@ import (
 	"log"
 	"time"
 
+	database "github.com/Ali-Assar/SkySpyBot/db"
 	"github.com/Ali-Assar/SkySpyBot/types"
 	owm "github.com/briandowns/openweathermap"
 	"github.com/enescakir/emoji"
 )
 
 var OWMApiKey string
+var RedisClient database.RedisClient
 
 // SendWeather sends weather information for the given city to the given chat ID
 func SendWeather(chatID int64, cityLocation string) error {
@@ -18,20 +20,38 @@ func SendWeather(chatID int64, cityLocation string) error {
 		description string
 		icon        string
 	)
-	w, err := owm.NewCurrent("C", "EN", OWMApiKey)
+
+	w, err := owm.NewCurrent("C", "EN", OWMApiKey) // define w here
 	if err != nil {
 		log.Println("Error creating OWM client:", err)
 		return err
 	}
 
-	w.CurrentByName(cityLocation)
-
-	if w.Weather != nil {
-		description = w.Weather[0].Description
-		icon = w.Weather[0].Icon
+	// Try to get the weather data from Redis
+	weatherData, iconData, err := RedisClient.GetWeather(cityLocation)
+	if err != nil {
+		log.Println("Error getting weather data from Redis:", err)
+	} else if weatherData != nil && iconData != nil {
+		// If the weather data is available in Redis, use it
+		description = weatherData["description"]
+		icon = iconData["icon"]
 	} else {
-		msg := "Data for requested location is not valid"
-		return SendMessage(chatID, msg)
+		// If the weather data is not available in Redis, send a query to the API
+		w.CurrentByName(cityLocation)
+
+		if w.Weather != nil {
+			description = w.Weather[0].Description
+			icon = w.Weather[0].Icon
+
+			// Cache the weather data in Redis
+			err = RedisClient.SetWeather(cityLocation, description, icon)
+			if err != nil {
+				log.Println("Error setting weather data in Redis:", err)
+			}
+		} else {
+			msg := "Data for requested location is not valid"
+			return SendMessage(chatID, msg)
+		}
 	}
 
 	iconURL := fmt.Sprintf("http://openweathermap.org/img/wn/%s@4x.png", icon)

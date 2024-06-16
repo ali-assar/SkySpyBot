@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -14,7 +15,6 @@ import (
 var OWMApiKey string
 var RedisClient database.RedisClient
 
-// SendWeather sends weather information for the given city to the given chat ID
 func SendWeather(chatID int64, cityLocation string) error {
 	var (
 		description string
@@ -27,23 +27,21 @@ func SendWeather(chatID int64, cityLocation string) error {
 		return err
 	}
 
-	// Try to get the weather data from Redis
 	weatherData, iconData, err := RedisClient.GetWeather(cityLocation)
-	if err != nil {
+	if (err != nil) && (!errors.Is(err, database.WeatherGetError)) {
 		log.Println("Error getting weather data from Redis:", err)
 	} else if weatherData != nil && iconData != nil {
-		// If the weather data is available in Redis, use it
-		description = weatherData["description"]
-		icon = iconData["icon"]
+		description = string(weatherData)
+		icon = string(iconData)
+		log.Println("data is cached")
 	} else {
-		// If the weather data is not available in Redis, send a query to the API
 		w.CurrentByName(cityLocation)
+		log.Println("sent a query to get data")
 
 		if w.Weather != nil {
 			description = w.Weather[0].Description
 			icon = w.Weather[0].Icon
 
-			// Cache the weather data in Redis
 			err = RedisClient.SetWeather(cityLocation, description, icon)
 			if err != nil {
 				log.Println("Error setting weather data in Redis:", err)

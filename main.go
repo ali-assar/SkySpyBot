@@ -20,10 +20,11 @@ func main() {
 
 	redisAddress := os.Getenv("REDIS_ADDRESS")
 
-	redisClient, err := database.NewRedisClient(redisAddress)
+	redisClient, cancel, err := database.NewRedisClient(redisAddress)
 	if err != nil {
 		log.Fatalf("Failed to create Redis client: %v", err)
 	}
+	defer cancel()
 
 	handler.RedisClient = redisClient // set the RedisClient in the handler package
 

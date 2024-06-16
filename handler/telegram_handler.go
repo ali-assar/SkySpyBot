@@ -12,7 +12,6 @@ import (
 
 var TelegramApikey string
 
-// Handler handles incoming HTTP requests
 func Handler(res http.ResponseWriter, req *http.Request) {
 	body := &types.WebhookReqBody{}
 	if err := json.NewDecoder(req.Body).Decode(body); err != nil {
@@ -35,7 +34,6 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 	log.Printf("Reply sent to %v", body.Message.Chat.ID)
 }
 
-// SendMessage sends a text message to the given chat ID
 func SendMessage(chatID int64, text string) error {
 	reqBody := &types.SendMessageReqBody{
 		ChatID: chatID,
@@ -58,7 +56,6 @@ func SendMessage(chatID int64, text string) error {
 	return nil
 }
 
-// SendPhoto sends a photo to the given chat ID
 func SendPhoto(chatID int64, photoURL string) error {
 	reqBody := &types.SendPhotoReqBody{
 		ChatID: chatID,

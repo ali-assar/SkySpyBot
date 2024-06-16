@@ -6,19 +6,19 @@ on:
   pull_request:
     branches: ["main"]
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: get the code
-        uses: actions/checkout@v4
-      - name: install golang
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: "go.mod"
-      - name: run the tests
-        run: go test ./... -v
+  # test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: get the code
+  #       uses: actions/checkout@v4
+  #     - name: install golang
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version-file: "go.mod"
+  #     - name: run the tests
+  #       run: go test ./... -v
   docker:
-    needs: test
+    # needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

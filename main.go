@@ -19,8 +19,8 @@ func main() {
 	handler.TelegramApikey = os.Getenv("TELEGRAM_BOT_TOKEN")
 	redisAddress := os.Getenv("REDIS_ADDRESS")
 
-	log.Printf("handler.OWMApiKey:%s handler.TelegramApikey:%s redisAddress:%s\n",handler.OWMApiKey,handler.TelegramApikey,redisAddress)
-	
+	log.Printf("handler.OWMApiKey:%s handler.TelegramApikey:%s redisAddress:%s\n", handler.OWMApiKey, handler.TelegramApikey, redisAddress)
+
 	redisClient, cancel, err := database.NewRedisClient(redisAddress)
 	if err != nil {
 		log.Fatalf("Failed to create Redis client: %v", err)
@@ -30,5 +30,5 @@ func main() {
 	handler.RedisClient = redisClient // set the RedisClient in the handler package
 
 	log.Println("running")
-	http.ListenAndServe(":8080", http.HandlerFunc(handler.Handler))
+	http.ListenAndServe(":5000", http.HandlerFunc(handler.Handler))
 }

@@ -1,5 +1,5 @@
 # sudo docker build -t skyspy:latest .
-# sudo docker run -p 8080:8080 skyspy:latest
+# sudo docker run -p 5000:5000 skyspy:latest
 FROM golang:1.22.1-alpine3.19 as build
 WORKDIR /app
 COPY ./go.mod .
@@ -15,5 +15,5 @@ COPY --from=build /app/skyspy /app
 COPY .env /app/
 COPY start.sh /app/
 RUN chmod +x /app/start.sh
-EXPOSE 8080
+EXPOSE 5000
 ENTRYPOINT ["/app/start.sh"]

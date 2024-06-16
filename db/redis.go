@@ -3,10 +3,16 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/redis/rueidis"
+)
+
+var (
+	IconGetError    = errors.New("unable to icon error")
+	WeatherGetError = errors.New("unable to weather error")
 )
 
 type RedisClient struct {
@@ -14,15 +20,19 @@ type RedisClient struct {
 	Ctx    context.Context
 }
 
-func NewRedisClient(address string) (RedisClient, error) {
+type CloseFunc func()
+
+func NewRedisClient(address string) (RedisClient, CloseFunc, error) {
 	client, err := rueidis.NewClient(rueidis.ClientOption{InitAddress: []string{address}})
 	if err != nil {
-		return RedisClient{}, fmt.Errorf("failed to create client: %w", err)
+		return RedisClient{}, nil, fmt.Errorf("failed to create client: %w", err)
 	}
 
 	ctx := context.Background()
 
-	return RedisClient{Client: client, Ctx: ctx}, nil
+	return RedisClient{Client: client, Ctx: ctx}, func() {
+		client.Close()
+	}, nil
 }
 
 func (r RedisClient) SetWeather(city, weather, icon string) error {
@@ -40,17 +50,16 @@ func (r RedisClient) SetWeather(city, weather, icon string) error {
 	return nil
 }
 
-func (r RedisClient) GetWeather(city string) (map[string]string, map[string]string, error) {
+func (r RedisClient) GetWeather(city string) ([]byte, []byte, error) {
 	// Get the weather
-	weather, err := r.Client.Do(r.Ctx, r.Client.B().Get().Key(city+"weather").Build()).AsStrMap()
+	weather, err := r.Client.Do(r.Ctx, r.Client.B().Get().Key(city+"weather").Build()).AsBytes()
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get weather: %w", err)
+		return nil, nil, errors.Join(WeatherGetError, err)
 	}
-
-	// Get the icon
-	icon, err := r.Client.Do(r.Ctx, r.Client.B().Get().Key(city+"weathericon").Build()).AsStrMap()
+	
+	icon, err := r.Client.Do(r.Ctx, r.Client.B().Get().Key(city+"weathericon").Build()).AsBytes()
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get weather icon: %w", err)
+		return nil, nil, errors.Join(IconGetError, err)
 	}
 
 	return weather, icon, nil

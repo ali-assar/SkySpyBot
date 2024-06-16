@@ -20,7 +20,7 @@ type SendPhotoReqBody struct {
 }
 
 type WeatherData struct {
-	Description string
+	State       string
 	Temperature float64
 	FeelsLike   float64
 	Humidity    int

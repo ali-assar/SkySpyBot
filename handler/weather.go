@@ -42,7 +42,7 @@ func SendWeather(chatID int64, cityLocation string) error {
 
 		if w.Weather != nil {
 			data := types.WeatherData{
-				Description: description,
+				State:       w.Weather[0].Description,
 				Temperature: w.Main.Temp,
 				FeelsLike:   w.Main.FeelsLike,
 				Humidity:    w.Main.Humidity,
@@ -79,7 +79,7 @@ func CreateWeatherMsg(data types.WeatherData) string {
 	percentString := "%"
 	msg := emoji.Sprintf(
 		":satellite:Weather: %s\n:thermometer:Temperature: %.3f (Feels Like: %.3f)\n:droplet:Humidity: %v%s\n:sunrise:Sunrise: %s\n:sunset:Sunset: %s\n:dash:Wind Speed: %.3f KpH\n %v",
-		data.Description,
+		data.State,
 		data.Temperature,
 		data.FeelsLike,
 		data.Humidity,

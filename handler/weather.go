@@ -49,7 +49,6 @@ func SendWeather(chatID int64, cityLocation string) error {
 				Sunset:      w.Sys.Sunrise,
 				Sunrise:     w.Sys.Sunset,
 				WindSpeed:   w.Wind.Speed,
-				Dt:          w.Dt,
 			}
 
 			description = CreateWeatherMsg(data)
@@ -78,7 +77,7 @@ func SendWeather(chatID int64, cityLocation string) error {
 func CreateWeatherMsg(data types.WeatherData) string {
 	percentString := "%"
 	msg := emoji.Sprintf(
-		":satellite:Weather: %s\n:thermometer:Temperature: %.3f (Feels Like: %.3f)\n:droplet:Humidity: %v%s\n:sunrise:Sunrise: %s\n:sunset:Sunset: %s\n:dash:Wind Speed: %.3f KpH\n %v",
+		":satellite:Weather: %s\n:thermometer:Temperature: %.3f (Feels Like: %.3f)\n:droplet:Humidity: %v%s\n:sunrise:Sunrise: %s\n:sunset:Sunset: %s\n:dash:Wind Speed: %.3f KpH\n",
 		data.State,
 		data.Temperature,
 		data.FeelsLike,
@@ -87,7 +86,6 @@ func CreateWeatherMsg(data types.WeatherData) string {
 		time.Unix(int64(data.Sunrise), 0).Format("15:04 MST"),
 		time.Unix(int64(data.Sunset), 0).Format("15:04 MST"),
 		data.WindSpeed,
-		time.Unix(int64(data.Dt), 0),
 	)
 	return msg
 }

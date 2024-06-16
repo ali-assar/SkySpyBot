@@ -27,5 +27,4 @@ type WeatherData struct {
 	Sunset      int
 	Sunrise     int
 	WindSpeed   float64
-	Dt          int
 }

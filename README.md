@@ -1,24 +1,24 @@
-```markdown
-# Sky Spy Robot :satellite:
+# Sky Spy Robot
 
-Sky Spy Robot is a weather bot that provides real-time weather updates. It uses OpenWeatherMap API to fetch the current weather data and Redis for caching to enhance performance.
+Sky Spy Robot is a weather bot that provides real-time weather updates. It's written in Go and uses the OpenWeatherMap API to fetch accurate weather data. Additionally, Redis is used for caching to enhance performance.
 
 ## Features :sparkles:
 
 - Real-time weather updates
-- Uses OpenWeatherMap API for accurate weather data
-- Caches data using Redis for improved performance
+- Accurate weather data from OpenWeatherMap API
+- Caching with Redis for improved performance
 
-## Development :hammer_and_wrench:
+## Usage
 
-The Sky Spy Robot is currently under active development. More features and improvements are coming soon!
+To use Sky Spy Robot, simply send a message with your city name to the bot (@Weatherforcastspy_bot), and it will reply with the current weather in your location.
 
-## Usage :robot:
+<div style="text-align:center">
+    <img src="./images/start.jpg" alt="start">
+</div>
 
-To use the Sky Spy Robot, simply send a message with your city name, and the bot will reply with the current weather in your location.
+<div style="text-align:center">
+    <img src="./images/msg.jpg" alt="msg">
+</div>
 
-## Contributing :handshake:
-
-Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) first.
 
 ```

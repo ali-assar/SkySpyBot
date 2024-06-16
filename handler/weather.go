@@ -28,6 +28,7 @@ func SendWeather(chatID int64, cityLocation string) error {
 	}
 
 	weatherData, iconData, err := RedisClient.GetWeather(cityLocation)
+
 	if (err != nil) && (!errors.Is(err, database.WeatherGetError)) {
 		log.Println("Error getting weather data from Redis:", err)
 	} else if weatherData != nil && iconData != nil {
@@ -35,11 +36,23 @@ func SendWeather(chatID int64, cityLocation string) error {
 		icon = string(iconData)
 		log.Println("data is cached")
 	} else {
+
 		w.CurrentByName(cityLocation)
 		log.Println("sent a query to get data")
 
 		if w.Weather != nil {
-			description = w.Weather[0].Description
+			data := types.WeatherData{
+				Description: description,
+				Temperature: w.Main.Temp,
+				FeelsLike:   w.Main.FeelsLike,
+				Humidity:    w.Main.Humidity,
+				Sunset:      w.Sys.Sunrise,
+				Sunrise:     w.Sys.Sunset,
+				WindSpeed:   w.Wind.Speed,
+				Dt:          w.Dt,
+			}
+
+			description = CreateWeatherMsg(data)
 			icon = w.Weather[0].Icon
 
 			err = RedisClient.SetWeather(cityLocation, description, icon)
@@ -59,20 +72,7 @@ func SendWeather(chatID int64, cityLocation string) error {
 		return err
 	}
 
-	data := types.WeatherData{
-		Description: description,
-		Temperature: w.Main.Temp,
-		FeelsLike:   w.Main.FeelsLike,
-		Humidity:    w.Main.Humidity,
-		Sunset:      w.Sys.Sunrise,
-		Sunrise:     w.Sys.Sunset,
-		WindSpeed:   w.Wind.Speed,
-		Dt:          w.Dt,
-	}
-
-	msg := CreateWeatherMsg(data)
-
-	return SendMessage(chatID, msg)
+	return SendMessage(chatID, description)
 }
 
 func CreateWeatherMsg(data types.WeatherData) string {

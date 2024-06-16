@@ -56,7 +56,7 @@ func (r RedisClient) GetWeather(city string) ([]byte, []byte, error) {
 	if err != nil {
 		return nil, nil, errors.Join(WeatherGetError, err)
 	}
-	
+
 	icon, err := r.Client.Do(r.Ctx, r.Client.B().Get().Key(city+"weathericon").Build()).AsBytes()
 	if err != nil {
 		return nil, nil, errors.Join(IconGetError, err)

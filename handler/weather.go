@@ -51,7 +51,7 @@ func SendWeather(chatID int64, cityLocation string) error {
 				WindSpeed:   w.Wind.Speed,
 			}
 
-			description = CreateWeatherMsg(data)
+			description = CreateWeatherMsg(data) + fmt.Sprintf("\nCity:%s", cityLocation)
 			icon = w.Weather[0].Icon
 
 			err = RedisClient.SetWeather(cityLocation, description, icon)

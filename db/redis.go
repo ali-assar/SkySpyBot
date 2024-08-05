@@ -37,12 +37,12 @@ func NewRedisClient(address string) (RedisClient, CloseFunc, error) {
 
 func (r RedisClient) SetWeather(city, weather, icon string) error {
 	// Set the weather and icon with an expiry of 1 hour
-	err := r.Client.Do(r.Ctx, r.Client.B().Set().Key(city+"weather").Value(weather).Ex(time.Hour).Build()).Error()
+	err := r.Client.Do(r.Ctx, r.Client.B().Set().Key(city+"weather").Value(weather).Ex(time.Minute*5).Build()).Error()
 	if err != nil {
 		return fmt.Errorf("failed to set weather: %w", err)
 	}
 
-	err = r.Client.Do(r.Ctx, r.Client.B().Set().Key(city+"weathericon").Value(icon).Ex(time.Hour).Build()).Error()
+	err = r.Client.Do(r.Ctx, r.Client.B().Set().Key(city+"weathericon").Value(icon).Ex(time.Minute*5).Build()).Error()
 	if err != nil {
 		return fmt.Errorf("failed to set weather icon: %w", err)
 	}
